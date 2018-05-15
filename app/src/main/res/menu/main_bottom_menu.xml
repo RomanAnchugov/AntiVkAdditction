@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/mi_messages"
+        android:title="@string/messages"
+        android:icon="@drawable/ic_messages"
+        app:showAsAction="ifRoom"
+        />
+
+    <item android:id="@+id/mi_friends"
+        android:title="@string/friends"
+        android:icon="@drawable/ic_friends"
+        app:showAsAction="ifRoom"
+        />
+
+    <item android:id="@+id/mi_groups"
+        android:title="@string/groups"
+        android:icon="@drawable/ic_groups"
+        app:showAsAction="ifRoom"
+        />
+
+    <item android:id="@+id/mi_news"
+        android:title="@string/news"
+        android:icon="@drawable/ic_news"
+        app:showAsAction="ifRoom"
+        />
+
+</menu>

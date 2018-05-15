@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">AntiVkAddiction</string>
+    <string name="messages">Сообщения</string>
+    <string name="friends">Друзья</string>
+    <string name="groups">Группы</string>
+    <string name="news">Новости</string>
     <integer name="com_vk_sdk_AppId">6473338</integer>
 </resources>
