@@ -27,7 +27,8 @@ public class MainActivity extends AppCompatActivity {
             VKScope.MESSAGES,
             VKScope.FRIENDS,
             VKScope.GROUPS,
-            VKScope.WALL
+            VKScope.WALL,
+            VKScope.GROUPS,
     };
 
     @Override
