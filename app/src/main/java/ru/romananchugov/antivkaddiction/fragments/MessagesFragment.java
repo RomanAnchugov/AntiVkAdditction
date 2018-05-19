@@ -10,13 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.vk.sdk.api.VKApi;
-import com.vk.sdk.api.VKApiConst;
-import com.vk.sdk.api.VKParameters;
-import com.vk.sdk.api.VKRequest;
-import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiDialog;
-import com.vk.sdk.api.model.VKApiGetDialogResponse;
 import com.vk.sdk.api.model.VKList;
 
 import ru.romananchugov.antivkaddiction.R;
@@ -28,6 +22,7 @@ import ru.romananchugov.antivkaddiction.adapters.MessagesAdapter;
 
 @SuppressLint("ValidFragment")
 public class MessagesFragment extends Fragment {
+    private static final String TAG = MessagesFragment.class.getSimpleName();
 
     private VKList<VKApiDialog> messagesList;
     private RecyclerView messagesRecycler;
@@ -46,15 +41,15 @@ public class MessagesFragment extends Fragment {
         messagesRecycler = v.findViewById(R.id.rv_messages);
         messagesRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         messagesRecycler.setAdapter(adapter);
-
-        VKRequest request = VKApi.messages().getDialogs(VKParameters.from(VKApiConst.COUNT, "100"));
-
-        request.executeWithListener(new VKRequest.VKRequestListener() {
+        messagesRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onComplete(VKResponse response) {
-                VKApiGetDialogResponse messagesResponse = (VKApiGetDialogResponse) response.parsedModel;
-                messagesList.addAll(messagesResponse.items);
-                adapter.notifyDataSetChanged();
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if(!recyclerView.canScrollVertically(1)){
+                    adapter.increaseOffset();
+                    adapter.loadNewDialogs();
+                }
             }
         });
 
