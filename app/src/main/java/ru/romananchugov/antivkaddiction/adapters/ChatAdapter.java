@@ -2,6 +2,7 @@ package ru.romananchugov.antivkaddiction.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.vk.sdk.api.VKApiConst;
+import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -26,11 +28,11 @@ import ru.romananchugov.antivkaddiction.R;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final String TAG = ChatAdapter.class.getSimpleName();
 
-    private long userId;
+    private long chatId;
     private JSONArray messagesJsonArray;
 
-    public ChatAdapter(long userId){
-        this.userId = userId;
+    public ChatAdapter(long chatId){
+        this.chatId = chatId;
         loadMessages();
         messagesJsonArray = new JSONArray();
     }
@@ -57,17 +59,23 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private void loadMessages(){
         final VKRequest request = new VKRequest("messages.getHistory"
-                , VKParameters.from(VKApiConst.USER_ID, userId, VKApiConst.COUNT, 200));
+                , VKParameters.from("user_id", chatId, VKApiConst.COUNT, 200));
 
         request.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(VKResponse response) {
                 try {
+                    Log.i(TAG, "onComplete: " + response.json.toString());
                     messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
                     notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void onError(VKError error) {
+                Log.i(TAG, "onError: " + error.errorMessage + " " + error.errorReason + error.toString());
             }
         });
     }

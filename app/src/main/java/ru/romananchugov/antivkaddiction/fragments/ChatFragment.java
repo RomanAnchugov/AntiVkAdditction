@@ -21,20 +21,20 @@ import ru.romananchugov.antivkaddiction.adapters.ChatAdapter;
 @SuppressLint("ValidFragment")
 public class ChatFragment extends Fragment {
 
-    private long userId;
+    private long chatId;
 
     private RecyclerView chatMessagesRecycler;
     private ChatAdapter adapter;
 
-    public ChatFragment(long userId){
-        this.userId = userId;
+    public ChatFragment(long chatId){
+        this.chatId = chatId;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.chat_fragment, container, false);
-        adapter = new ChatAdapter(userId);
+        adapter = new ChatAdapter(chatId);
         chatMessagesRecycler = v.findViewById(R.id.rv_chat_messages);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setReverseLayout(true);
