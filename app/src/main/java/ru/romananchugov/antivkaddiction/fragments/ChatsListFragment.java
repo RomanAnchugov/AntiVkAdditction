@@ -13,32 +13,33 @@ import android.view.ViewGroup;
 import com.vk.sdk.api.model.VKApiDialog;
 import com.vk.sdk.api.model.VKList;
 
+import ru.romananchugov.antivkaddiction.MainActivity;
 import ru.romananchugov.antivkaddiction.R;
-import ru.romananchugov.antivkaddiction.adapters.MessagesAdapter;
+import ru.romananchugov.antivkaddiction.adapters.ChatsListAdapter;
 
 /**
  * Created by romananchugov on 15.05.2018.
  */
 
 @SuppressLint("ValidFragment")
-public class MessagesFragment extends Fragment {
-    private static final String TAG = MessagesFragment.class.getSimpleName();
+public class ChatsListFragment extends Fragment {
+    private static final String TAG = ChatsListFragment.class.getSimpleName();
 
     private VKList<VKApiDialog> messagesList;
     private RecyclerView messagesRecycler;
-    private MessagesAdapter adapter;
+    private ChatsListAdapter adapter;
 
-    public MessagesFragment(){
+    public ChatsListFragment(MainActivity mainActivity){
         messagesList = new VKList<>();
-        adapter = new MessagesAdapter(messagesList);
+        adapter = new ChatsListAdapter(messagesList, mainActivity);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.messages_fragment, container, false);
+        View v = inflater.inflate(R.layout.chats_list_fragment, container, false);
 
-        messagesRecycler = v.findViewById(R.id.rv_messages);
+        messagesRecycler = v.findViewById(R.id.rv_chats);
         messagesRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         messagesRecycler.setAdapter(adapter);
         messagesRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {

@@ -1,6 +1,7 @@
 package ru.romananchugov.antivkaddiction.adapters;
 
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,22 +19,26 @@ import com.vk.sdk.api.model.VKApiGetDialogResponse;
 import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKList;
 
+import ru.romananchugov.antivkaddiction.MainActivity;
 import ru.romananchugov.antivkaddiction.R;
+import ru.romananchugov.antivkaddiction.fragments.ChatFragment;
 
 /**
  * Created by romananchugov on 16.05.2018.
  */
 
-public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHolder> {
-    private static final String TAG = MessagesAdapter.class.getSimpleName();
+public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.ViewHolder> {
+    private static final String TAG = ChatsListAdapter.class.getSimpleName();
 
+    private MainActivity mainActivity;
     private VKList<VKApiDialog> messagesList;
     private int offset = 0;
     private int count = 200;
 
 
-    public MessagesAdapter(VKList<VKApiDialog> messageList){
+    public ChatsListAdapter(VKList<VKApiDialog> messageList, MainActivity mainActivity){
         this.messagesList = messageList;
+        this.mainActivity = mainActivity;
         loadNewDialogs();
     }
 
@@ -42,7 +47,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LinearLayout linearLayout = (LinearLayout) LayoutInflater.
-                from(parent.getContext()).inflate(R.layout.messages_item, parent, false);
+                from(parent.getContext()).inflate(R.layout.chat_list_item, parent, false);
         return new ViewHolder(linearLayout);
     }
 
@@ -90,8 +95,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
             super(itemView);
 
             linearLayout = (LinearLayout)itemView;
-            messageTitle = linearLayout.findViewById(R.id.tv_message_title);
-            messageBody = linearLayout.findViewById(R.id.tv_message_body);
+            messageTitle = linearLayout.findViewById(R.id.tv_chat_title);
+            messageBody = linearLayout.findViewById(R.id.tv_chat_body);
         }
 
         public void bind(final int position){
@@ -116,6 +121,25 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
             }else{
                 messageBody.setText(R.string.message_not_support);
             }
+
+            linearLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    //TODO:
+                }
+            });
+
+            linearLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    ft.addToBackStack(null);
+                    ft = ft.replace(R.id.fragment_container, new ChatFragment());
+                    ft.commit();
+                }
+            });
         }
     }
 }

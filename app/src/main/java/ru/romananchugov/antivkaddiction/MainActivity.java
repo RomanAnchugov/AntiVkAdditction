@@ -16,12 +16,13 @@ import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKError;
 
-import ru.romananchugov.antivkaddiction.fragments.MessagesFragment;
+import ru.romananchugov.antivkaddiction.fragments.ChatsListFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private BottomNavigationView bnvMainMenu;
+    public MainActivity mainActivity;
 
     private String[] scope = new String[]{
             VKScope.MESSAGES,
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mainActivity = this;
 
         //TODO: save access token
         VKSdk.login(this, scope);
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()){
                     case R.id.mi_messages:
-                        addFragment(new MessagesFragment(), false);
+                        addFragment(new ChatsListFragment(mainActivity), false);
                         break;
                     case R.id.mi_friends:
                         break;
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResult(final VKAccessToken res) {
                 // Пользователь успешно авторизовался
                 Toast.makeText(getApplicationContext(), "Logged", Toast.LENGTH_SHORT).show();
-                addFragment(new MessagesFragment(), false);
+                addFragment(new ChatsListFragment(mainActivity), false);
             }
             @Override
             public void onError(VKError error) {
