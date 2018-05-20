@@ -113,6 +113,18 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
                         messageTitle.setText(user.first_name + " " + user.last_name);
                     }
                 });
+
+                linearLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        long userId = messagesList.get(position).message.user_id;
+                        FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        ft.addToBackStack(null);
+                        ft = ft.replace(R.id.fragment_container, new ChatFragment(userId));
+                        ft.commit();
+                    }
+                });
             }
 
             //MESSAGE BODY BINDING
@@ -121,25 +133,6 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
             }else{
                 messageBody.setText(R.string.message_not_support);
             }
-
-            linearLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    //TODO:
-                }
-            });
-
-            linearLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
-                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    ft.addToBackStack(null);
-                    ft = ft.replace(R.id.fragment_container, new ChatFragment());
-                    ft.commit();
-                }
-            });
         }
     }
 }

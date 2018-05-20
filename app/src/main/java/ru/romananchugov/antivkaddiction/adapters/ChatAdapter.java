@@ -8,6 +8,15 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.vk.sdk.api.VKApiConst;
+import com.vk.sdk.api.VKParameters;
+import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import ru.romananchugov.antivkaddiction.R;
 
 /**
@@ -15,6 +24,16 @@ import ru.romananchugov.antivkaddiction.R;
  */
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
+    private static final String TAG = ChatAdapter.class.getSimpleName();
+
+    private long userId;
+    private JSONArray messagesJsonArray;
+
+    public ChatAdapter(long userId){
+        this.userId = userId;
+        loadMessages();
+        messagesJsonArray = new JSONArray();
+    }
 
 
     @NonNull
@@ -33,22 +52,50 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return 10;
+        return messagesJsonArray.length();
+    }
+
+    private void loadMessages(){
+        final VKRequest request = new VKRequest("messages.getHistory"
+                , VKParameters.from(VKApiConst.USER_ID, userId, VKApiConst.COUNT, 200));
+
+        request.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override
+            public void onComplete(VKResponse response) {
+                try {
+                    messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
+                    notifyDataSetChanged();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{
 
         private LinearLayout linearLayout;
-        private TextView chatMessage;
+        private TextView inMessage;
+        private TextView outMessage;
 
         public ViewHolder(View itemView) {
             super(itemView);
             linearLayout = (LinearLayout)itemView;
-            chatMessage = linearLayout.findViewById(R.id.tv_chat_message);
+            inMessage = linearLayout.findViewById(R.id.tv_in_message);
+            outMessage = linearLayout.findViewById(R.id.tv_out_message);
         }
 
         public void bind(int position){
-            chatMessage.setText(position + "");
+            try {
+                JSONObject messageObject = messagesJsonArray.getJSONObject(position);
+                if(messageObject.getInt("out") == 1){
+                    outMessage.setText(messageObject.getString("body"));
+                }else{
+                    inMessage.setText(messageObject.getString("body"));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
