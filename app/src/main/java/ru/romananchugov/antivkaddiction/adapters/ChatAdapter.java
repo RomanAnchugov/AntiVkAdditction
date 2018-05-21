@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.vk.sdk.api.VKApiConst;
-import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -57,7 +56,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         return messagesJsonArray.length();
     }
 
-    private void loadMessages(){
+    public void loadMessages(){
         final VKRequest request = new VKRequest("messages.getHistory"
                 , VKParameters.from("user_id", chatId, VKApiConst.COUNT, 200));
 
@@ -65,17 +64,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             @Override
             public void onComplete(VKResponse response) {
                 try {
-                    Log.i(TAG, "onComplete: " + response.json.toString());
+                    messagesJsonArray = null;
                     messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
                     notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                Log.i(TAG, "onError: " + error.errorMessage + " " + error.errorReason + error.toString());
             }
         });
     }
@@ -96,6 +90,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         public void bind(int position){
             try {
                 JSONObject messageObject = messagesJsonArray.getJSONObject(position);
+                Log.i(TAG, "bind: " + messageObject.toString());
                 if(messageObject.getInt("out") == 1){
                     outMessage.setText(messageObject.getString("body"));
                 }else{
