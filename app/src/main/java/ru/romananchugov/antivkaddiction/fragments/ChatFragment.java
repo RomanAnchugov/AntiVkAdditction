@@ -19,6 +19,7 @@ import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 
+import ru.romananchugov.antivkaddiction.MainActivity;
 import ru.romananchugov.antivkaddiction.R;
 import ru.romananchugov.antivkaddiction.adapters.ChatAdapter;
 
@@ -31,6 +32,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = ChatFragment.class.getSimpleName();
 
     private long chatId;
+    private String chatName;
 
     private RecyclerView chatMessagesRecycler;
     private ChatAdapter adapter;
@@ -38,7 +40,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private EditText messageInput;
     private ImageButton messageSender;
 
-    public ChatFragment(long chatId){
+    public ChatFragment(long chatId, String chatName){
+        this.chatName = chatName;
         this.chatId = chatId;
     }
 
@@ -58,6 +61,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         messageSender = v.findViewById(R.id.ib_chat_sender);
         messageSender.setOnClickListener(this);
 
+        if(getActivity() != null){
+            ((MainActivity)getActivity()).setTitle(chatName);
+        }
 
         return v;
     }
@@ -88,6 +94,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 Log.i(TAG, "onError: " + error.toString());
             }
         });
+
+        messageInput.setText("");
     }
 
     @Override
@@ -98,4 +106,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 break;
         }
     }
+
+
 }

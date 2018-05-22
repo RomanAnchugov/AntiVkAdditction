@@ -8,6 +8,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.vk.sdk.VKAccessToken;
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private BottomNavigationView bnvMainMenu;
+    private FrameLayout fragmentContainer;
     public MainActivity mainActivity;
 
     private String[] scope = new String[]{
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         //TODO: save access token
         VKSdk.login(this, scope);
 
+        fragmentContainer = findViewById(R.id.fragment_container);
         bnvMainMenu = findViewById(R.id.bnv_main_navigation);
         bnvMainMenu.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -82,6 +86,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                getSupportFragmentManager().popBackStackImmediate();
+                resetOnBack();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        resetOnBack();
+    }
+
     public void addFragment(Fragment fragment, boolean addToBackStack){
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -90,5 +111,20 @@ public class MainActivity extends AppCompatActivity {
         }
         ft = ft.replace(R.id.fragment_container, fragment);
         ft.commit();
+    }
+
+    public void hideBottomNav(){
+        bnvMainMenu.setVisibility(View.GONE);
+        fragmentContainer.setPadding(0, 0, 0, 0);
+    }
+
+    public void resetOnBack(){
+        if(getSupportFragmentManager().getBackStackEntryCount() == 0
+                && getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+        bnvMainMenu.setVisibility(View.VISIBLE);
+        this.setTitle(getResources().getString(R.string.app_name));
+        fragmentContainer.setPadding(0, 0, 0, 60);
     }
 }

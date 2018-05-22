@@ -148,10 +148,17 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
             linearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
+                    mainActivity.hideBottomNav();
+                    if(mainActivity.getSupportActionBar() != null) {
+                        mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    }
+
                     FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     ft.addToBackStack(null);
-                    ft = ft.replace(R.id.fragment_container, new ChatFragment(chatIdsArray.get(position)));
+                    ft = ft.replace(R.id.fragment_container,
+                            new ChatFragment(chatIdsArray.get(position), messageTitle.getText().toString()));
                     ft.commit();
                 }
             });

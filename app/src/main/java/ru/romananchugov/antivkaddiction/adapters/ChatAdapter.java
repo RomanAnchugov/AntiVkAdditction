@@ -56,6 +56,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         return messagesJsonArray.length();
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
     public void loadMessages(){
         final VKRequest request = new VKRequest("messages.getHistory"
                 , VKParameters.from("user_id", chatId, VKApiConst.COUNT, 200));
@@ -66,6 +71,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 try {
                     messagesJsonArray = null;
                     messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
+
+                    Log.i(TAG, "onComplete: " + messagesJsonArray.length());
+
+//                    for(int i = 0; i < messagesJsonArray.length(); i++){
+//                        Log.i(TAG, "onComplete: " + messagesJsonArray.get(i).toString());
+//                    }
+
                     notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -92,9 +104,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 JSONObject messageObject = messagesJsonArray.getJSONObject(position);
                 Log.i(TAG, "bind: " + messageObject.toString());
                 if(messageObject.getInt("out") == 1){
+                    inMessage.setVisibility(View.GONE);
+                    outMessage.setVisibility(View.VISIBLE);
                     outMessage.setText(messageObject.getString("body"));
                 }else{
+                    inMessage.setVisibility(View.VISIBLE);
                     inMessage.setText(messageObject.getString("body"));
+                    outMessage.setVisibility(View.GONE);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
