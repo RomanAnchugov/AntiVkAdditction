@@ -2,7 +2,6 @@ package ru.romananchugov.antivkaddiction.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +25,8 @@ import ru.romananchugov.antivkaddiction.R;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final String TAG = ChatAdapter.class.getSimpleName();
+    private static final int INPUT_MESSAGE = 1;
+    private static final int OUTPUT_MESSAGE = 2;
 
     private long chatId;
     private JSONArray messagesJsonArray;
@@ -40,8 +41,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        int messageType = 0;
+        switch (viewType){
+            case INPUT_MESSAGE:
+                messageType = R.layout.input_message_view;
+                break;
+            case OUTPUT_MESSAGE:
+                messageType = R.layout.output_message_view;
+                break;
+        }
+
         LinearLayout linearLayout = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.chat_item, parent, false);
+                .inflate(messageType, parent, false);
 
         return new ViewHolder(linearLayout);
     }
@@ -58,6 +69,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
+        try {
+            JSONObject messageObject = messagesJsonArray.getJSONObject(position);
+            if(messageObject.getInt("out") == 1){
+                return OUTPUT_MESSAGE;
+            }else{
+                return INPUT_MESSAGE;
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         return position;
     }
 
@@ -72,8 +95,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     messagesJsonArray = null;
                     messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
 
-                    Log.i(TAG, "onComplete: " + messagesJsonArray.length());
-
+                    //from_id - чьё это сообщение
 //                    for(int i = 0; i < messagesJsonArray.length(); i++){
 //                        Log.i(TAG, "onComplete: " + messagesJsonArray.get(i).toString());
 //                    }
@@ -89,28 +111,29 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder{
 
         private LinearLayout linearLayout;
-        private TextView inMessage;
-        private TextView outMessage;
+        private TextView messageBody;
 
         public ViewHolder(View itemView) {
             super(itemView);
             linearLayout = (LinearLayout)itemView;
-            inMessage = linearLayout.findViewById(R.id.tv_in_message);
-            outMessage = linearLayout.findViewById(R.id.tv_out_message);
+            messageBody = linearLayout.findViewById(R.id.tv_message);
         }
 
         public void bind(int position){
             try {
                 JSONObject messageObject = messagesJsonArray.getJSONObject(position);
-                Log.i(TAG, "bind: " + messageObject.toString());
-                if(messageObject.getInt("out") == 1){
-                    inMessage.setVisibility(View.GONE);
-                    outMessage.setVisibility(View.VISIBLE);
-                    outMessage.setText(messageObject.getString("body"));
-                }else{
-                    inMessage.setVisibility(View.VISIBLE);
-                    inMessage.setText(messageObject.getString("body"));
-                    outMessage.setVisibility(View.GONE);
+
+                if(messageObject.has("body")) {
+                    messageBody.setText(messageObject.getString("body"));
+                }
+                if(messageObject.has("attachments")){
+                    messageBody.setText("attachments(coming soon)");
+                }
+                if(messageObject.has("fwd_messages")){
+                    messageBody.setText("fwd_messages(coming soon)");
+                }
+                if(messageObject.has("body") && messageObject.has("fwd_messages")){
+                    messageBody.setText("body with fwd_messages(coming soon)");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

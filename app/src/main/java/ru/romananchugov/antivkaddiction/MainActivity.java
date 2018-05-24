@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void hideBottomNav(){
         bnvMainMenu.setVisibility(View.GONE);
-        fragmentContainer.setPadding(0, 0, 0, 0);
+        //fragmentContainer.setPadding(0, 0, 0, 0);
     }
 
     public void resetOnBack(){
@@ -125,6 +125,6 @@ public class MainActivity extends AppCompatActivity {
         }
         bnvMainMenu.setVisibility(View.VISIBLE);
         this.setTitle(getResources().getString(R.string.app_name));
-        fragmentContainer.setPadding(0, 0, 0, 60);
+        //fragmentContainer.setPadding(0, 0, 0, 100);
     }
 }
