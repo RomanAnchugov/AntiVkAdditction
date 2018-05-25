@@ -158,7 +158,9 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     ft.addToBackStack(null);
                     ft = ft.replace(R.id.fragment_container,
-                            new ChatFragment(chatIdsArray.get(position), messageTitle.getText().toString()));
+                            new ChatFragment(chatIdsArray.get(position)
+                                    , messageTitle.getText().toString()
+                                    , mainActivity));
                     ft.commit();
                 }
             });

@@ -1,22 +1,30 @@
 package ru.romananchugov.antivkaddiction.adapters;
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.model.VKApiUser;
+import com.vk.sdk.api.model.VKList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Random;
+
+import ru.romananchugov.antivkaddiction.MainActivity;
 import ru.romananchugov.antivkaddiction.R;
 
 /**
@@ -30,9 +38,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private long chatId;
     private JSONArray messagesJsonArray;
+    private MainActivity mainActivity;
 
-    public ChatAdapter(long chatId){
+    public ChatAdapter(long chatId, MainActivity mainActivity){
         this.chatId = chatId;
+        this.mainActivity = mainActivity;
         loadMessages();
         messagesJsonArray = new JSONArray();
     }
@@ -108,20 +118,52 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         });
     }
 
+    public String loadUserInfo(int userId, final TextView messageUser){
+        final VKRequest request = VKApi.users()
+                .get(VKParameters.from(VKApiConst.USER_IDS, userId));
+        request.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override
+            public void onComplete(VKResponse response) {
+                VKApiUser user = ((VKList<VKApiUser>) response.parsedModel).get(0);
+                messageUser.setText(user.first_name + " " + user.last_name);
+            }
+        });
+        return null;
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder{
 
         private LinearLayout linearLayout;
         private TextView messageBody;
+        private TextView messageUser;
 
         public ViewHolder(View itemView) {
             super(itemView);
             linearLayout = (LinearLayout)itemView;
+            messageUser = null;
             messageBody = linearLayout.findViewById(R.id.tv_message);
+            if(!(linearLayout.findViewById(R.id.tv_message_user) == null)){
+                messageUser = linearLayout.findViewById(R.id.tv_message_user);
+            }
         }
 
         public void bind(int position){
             try {
                 JSONObject messageObject = messagesJsonArray.getJSONObject(position);
+                Log.i(TAG, "bind: " + messageObject.toString());
+
+                if(messageUser != null){
+                    if(messageObject.has("chat_id")) {
+                        loadUserInfo(messageObject.getInt("from_id"), messageUser);
+                        Random random = new Random();
+                        messageUser.setTextColor(Color.rgb(random.nextInt(255),
+                                random.nextInt(255),
+                                random.nextInt(255)));
+                    }else if(mainActivity.getSupportActionBar() != null){
+                        messageUser.setText(mainActivity.getSupportActionBar().getTitle());
+                    }
+
+                }
 
                 if(messageObject.has("body")) {
                     messageBody.setText(messageObject.getString("body"));

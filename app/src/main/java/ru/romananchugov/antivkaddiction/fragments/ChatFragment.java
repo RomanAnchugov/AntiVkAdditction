@@ -40,16 +40,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private EditText messageInput;
     private ImageButton messageSender;
 
-    public ChatFragment(long chatId, String chatName){
+    private MainActivity mainActivity;
+
+    public ChatFragment(long chatId, String chatName, MainActivity mainActivity){
         this.chatName = chatName;
         this.chatId = chatId;
+        this.mainActivity = mainActivity;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.chat_fragment, container, false);
-        adapter = new ChatAdapter(chatId);
+        adapter = new ChatAdapter(chatId, mainActivity);
         chatMessagesRecycler = v.findViewById(R.id.rv_chat_messages);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setReverseLayout(true);
