@@ -3,7 +3,6 @@ package ru.romananchugov.antivkaddiction.adapters;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +21,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import ru.romananchugov.antivkaddiction.MainActivity;
@@ -136,6 +137,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private LinearLayout linearLayout;
         private TextView messageBody;
         private TextView messageUser;
+        private TextView messageTime;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -145,12 +147,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             if(!(linearLayout.findViewById(R.id.tv_message_user) == null)){
                 messageUser = linearLayout.findViewById(R.id.tv_message_user);
             }
+            messageTime = linearLayout.findViewById(R.id.tv_message_time);
         }
 
         public void bind(int position){
             try {
                 JSONObject messageObject = messagesJsonArray.getJSONObject(position);
-                Log.i(TAG, "bind: " + messageObject.toString());
+                //Log.i(TAG, "bind: " + messageObject.toString());
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+                Date date = new Date(messageObject.getInt("date"));
 
                 if(messageUser != null){
                     if(messageObject.has("chat_id")) {
@@ -165,6 +171,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
                 }
 
+                messageTime.setText(simpleDateFormat.format(date));
                 if(messageObject.has("body")) {
                     messageBody.setText(messageObject.getString("body"));
                 }
