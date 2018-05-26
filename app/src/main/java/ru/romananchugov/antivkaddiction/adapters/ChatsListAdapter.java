@@ -3,6 +3,7 @@ package ru.romananchugov.antivkaddiction.adapters;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
+import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -40,7 +42,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
     private VKList<VKApiDialog> messagesList;
     private ArrayList<Integer> chatIdsArray;
     private int offset = 0;
-    private int count = 200;
+    private int count = 20;
 
 
     public ChatsListAdapter(VKList<VKApiDialog> messageList, MainActivity mainActivity){
@@ -100,6 +102,12 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
                 }
                 notifyDataSetChanged();
             }
+
+            @Override
+            public void onError(VKError error) {
+                super.onError(error);
+                Log.i(TAG, "onError: " + error.toString());
+            }
         });
     }
 
@@ -123,6 +131,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
         }
 
         public void bind(final int position){
+            Log.i(TAG, "bind: " + messagesList.get(position).message.toString());
             //MESSAGE TITLE BINDING
             if(!messagesList.get(position).message.title.equals("")) {
                 messageTitle.setText(messagesList.get(position).message.title);

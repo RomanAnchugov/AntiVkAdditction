@@ -1,12 +1,14 @@
 package ru.romananchugov.antivkaddiction;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -22,6 +24,8 @@ import ru.romananchugov.antivkaddiction.fragments.ChatsListFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final String PREF_TOKEN = "PrefToken";
 
     private BottomNavigationView bnvMainMenu;
     private FrameLayout fragmentContainer;
@@ -41,8 +45,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mainActivity = this;
 
-        //TODO: save access token
-        VKSdk.login(this, scope);
+
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        if(preferences.getString(PREF_TOKEN, null ) == null) {
+            VKSdk.login(this, scope);
+        }else{
+            addFragment(new ChatsListFragment(mainActivity), false);
+        }
 
         fragmentContainer = findViewById(R.id.fragment_container);
         bnvMainMenu = findViewById(R.id.bnv_main_navigation);
@@ -71,6 +80,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResult(final VKAccessToken res) {
                 // Пользователь успешно авторизовался
+                Log.i(TAG, "onResult: " + res.accessToken);
+                SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+                String oldToken = preferences.getString(PREF_TOKEN, null);
+                if(oldToken == null || (oldToken != null && !oldToken.equals(res.accessToken))){
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(PREF_TOKEN, res.accessToken);
+                    editor.apply();
+                }
+                Log.i(TAG, "onResult: " + oldToken);
+
                 Toast.makeText(getApplicationContext(), "Logged", Toast.LENGTH_SHORT).show();
                 addFragment(new ChatsListFragment(mainActivity), false);
             }

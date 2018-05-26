@@ -3,6 +3,7 @@ package ru.romananchugov.antivkaddiction.adapters;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final int INPUT_MESSAGE = 1;
     private static final int OUTPUT_MESSAGE = 2;
 
+    private int messagesCount = 50;
     private long chatId;
     private JSONArray messagesJsonArray;
     private MainActivity mainActivity;
@@ -97,7 +99,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     public void loadMessages(){
         final VKRequest request = new VKRequest("messages.getHistory"
-                , VKParameters.from("user_id", chatId, VKApiConst.COUNT, 200));
+                , VKParameters.from("user_id", chatId, VKApiConst.COUNT, messagesCount));
 
         request.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
@@ -153,7 +155,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         public void bind(int position){
             try {
                 JSONObject messageObject = messagesJsonArray.getJSONObject(position);
-                //Log.i(TAG, "bind: " + messageObject.toString());
+                Log.i(TAG, "bind: " + messageObject.toString());
 
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
                 Date date = new Date(messageObject.getInt("date"));
@@ -186,6 +188,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+                Log.i(TAG, "bind: " + e.getMessage());
             }
         }
     }

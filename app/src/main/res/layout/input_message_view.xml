@@ -32,6 +32,7 @@
             tools:text="8:00"
             android:textSize="12sp"
             android:gravity="end"
+            android:minWidth="25dp"
             />
     </LinearLayout>
 </LinearLayout>
