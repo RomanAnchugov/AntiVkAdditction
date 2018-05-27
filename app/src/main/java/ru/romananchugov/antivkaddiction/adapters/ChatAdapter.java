@@ -39,6 +39,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final int OUTPUT_MESSAGE = 2;
 
     private int messagesCount = 50;
+    private int pastOffset = 0;
     private int offset = 0;
     private long chatId;
     private JSONArray messagesJsonArray;
@@ -108,14 +109,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             @Override
             public void onComplete(VKResponse response) {
                 try {
-                    JSONArray  responseJson = response.json.getJSONObject("response").getJSONArray("items");
-                    for(int i = 0; i < responseJson.length(); i++){
-                        messagesJsonArray.put(responseJson.get(i));
+                    JSONArray responseJson = response.json.getJSONObject("response").getJSONArray("items");
+                    if(pastOffset != offset) {
+                        for (int i = 0; i < responseJson.length(); i++) {
+                            messagesJsonArray.put(responseJson.get(i));
+                        }
+                    }else{
+                        messagesJsonArray = responseJson;
                     }
-
-                    //messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
                     Log.i(TAG, "onComplete: " + messagesJsonArray.toString());
-
+                    Log.i(TAG, "complete: notifyer");
                     notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -125,7 +128,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     public void increaseOffset(){
+        pastOffset = offset;
         offset++;
+    }
+
+    public void clearOffset(){
+        offset = 0;
+        pastOffset = offset;
     }
 
 

@@ -83,6 +83,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void sendMessage(){
+        adapter.clearOffset();
         String messageText = messageInput.getText().toString();
         long chatId = this.chatId;
         VKRequest request;
@@ -101,6 +102,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onComplete(VKResponse response) {
                 adapter.loadMessages();
+                Log.i(TAG, "complete: sending complete" );
+                chatMessagesRecycler.scrollToPosition(0);
             }
 
             @Override
