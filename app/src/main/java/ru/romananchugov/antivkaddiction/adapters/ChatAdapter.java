@@ -39,6 +39,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final int OUTPUT_MESSAGE = 2;
 
     private int messagesCount = 50;
+    private int offset = 0;
     private long chatId;
     private JSONArray messagesJsonArray;
     private MainActivity mainActivity;
@@ -82,36 +83,38 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
+        JSONObject messageObject = null;
         try {
-            JSONObject messageObject = messagesJsonArray.getJSONObject(position);
+            messageObject = messagesJsonArray.getJSONObject(position);
             if(messageObject.getInt("out") == 1){
                 return OUTPUT_MESSAGE;
             }else{
                 return INPUT_MESSAGE;
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return position;
     }
 
     public void loadMessages(){
         final VKRequest request = new VKRequest("messages.getHistory"
-                , VKParameters.from("user_id", chatId, VKApiConst.COUNT, messagesCount));
+                , VKParameters.from(
+                        "user_id", chatId,
+                        VKApiConst.COUNT, messagesCount,
+                        VKApiConst.OFFSET, offset * messagesCount));
 
         request.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(VKResponse response) {
                 try {
-                    messagesJsonArray = null;
-                    messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
+                    JSONArray  responseJson = response.json.getJSONObject("response").getJSONArray("items");
+                    for(int i = 0; i < responseJson.length(); i++){
+                        messagesJsonArray.put(responseJson.get(i));
+                    }
 
-                    //from_id - чьё это сообщение
-//                    for(int i = 0; i < messagesJsonArray.length(); i++){
-//                        Log.i(TAG, "onComplete: " + messagesJsonArray.get(i).toString());
-//                    }
+                    //messagesJsonArray = response.json.getJSONObject("response").getJSONArray("items");
+                    Log.i(TAG, "onComplete: " + messagesJsonArray.toString());
 
                     notifyDataSetChanged();
                 } catch (JSONException e) {
@@ -120,6 +123,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             }
         });
     }
+
+    public void increaseOffset(){
+        offset++;
+    }
+
 
     public String loadUserInfo(int userId, final TextView messageUser){
         final VKRequest request = VKApi.users()
@@ -153,42 +161,43 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         }
 
         public void bind(int position){
+            JSONObject messageObject = null;
             try {
-                JSONObject messageObject = messagesJsonArray.getJSONObject(position);
-                Log.i(TAG, "bind: " + messageObject.toString());
+                messageObject = (JSONObject) messagesJsonArray.get(position);
 
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-                Date date = new Date(messageObject.getInt("date"));
+            Log.i(TAG, "bind: " + messageObject.toString());
 
-                if(messageUser != null){
-                    if(messageObject.has("chat_id")) {
-                        loadUserInfo(messageObject.getInt("from_id"), messageUser);
-                        Random random = new Random();
-                        messageUser.setTextColor(Color.rgb(random.nextInt(255),
-                                random.nextInt(255),
-                                random.nextInt(255)));
-                    }else if(mainActivity.getSupportActionBar() != null){
-                        messageUser.setText(mainActivity.getSupportActionBar().getTitle());
-                    }
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+            Date date = new Date(messageObject.getInt("date"));
 
+            if(messageUser != null){
+                if(messageObject.has("chat_id")) {
+                    loadUserInfo(messageObject.getInt("from_id"), messageUser);
+                    Random random = new Random();
+                    messageUser.setTextColor(Color.rgb(random.nextInt(255),
+                            random.nextInt(255),
+                            random.nextInt(255)));
+                }else if(mainActivity.getSupportActionBar() != null){
+                    messageUser.setText(mainActivity.getSupportActionBar().getTitle());
                 }
 
-                messageTime.setText(simpleDateFormat.format(date));
-                if(messageObject.has("body")) {
-                    messageBody.setText(messageObject.getString("body"));
-                }
-                if(messageObject.has("attachments")){
-                    messageBody.setText("attachments(coming soon)");
-                }
-                if(messageObject.has("fwd_messages")){
-                    messageBody.setText("fwd_messages(coming soon)");
-                }
-                if(messageObject.has("body") && messageObject.has("fwd_messages")){
-                    messageBody.setText("body with fwd_messages(coming soon)");
-                }
+            }
+
+            messageTime.setText(simpleDateFormat.format(date));
+            if(messageObject.has("body")) {
+                messageBody.setText(messageObject.getString("body"));
+            }
+            if(messageObject.has("attachments")){
+                messageBody.setText("attachments(coming soon)");
+            }
+            if(messageObject.has("fwd_messages")){
+                messageBody.setText("fwd_messages(coming soon)");
+            }
+            if(messageObject.has("body") && messageObject.has("fwd_messages")){
+                messageBody.setText("body with fwd_messages(coming soon)");
+            }
             } catch (JSONException e) {
                 e.printStackTrace();
-                Log.i(TAG, "bind: " + e.getMessage());
             }
         }
     }

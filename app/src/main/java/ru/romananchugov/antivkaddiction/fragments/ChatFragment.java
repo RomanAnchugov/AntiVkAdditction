@@ -59,13 +59,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         //linearLayoutManager.setStackFromEnd(true);
         chatMessagesRecycler.setLayoutManager(linearLayoutManager);
         chatMessagesRecycler.setAdapter(adapter);
+        chatMessagesRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if(!recyclerView.canScrollVertically(-1)){
+                    adapter.increaseOffset();
+                    adapter.loadMessages();
+                }
+            }
+        });
 
         messageInput = v.findViewById(R.id.et_chat_input);
         messageSender = v.findViewById(R.id.ib_chat_sender);
         messageSender.setOnClickListener(this);
 
-        if(getActivity() != null){
-            ((MainActivity)getActivity()).setTitle(chatName);
+        if(mainActivity != null){
+            mainActivity.setTitle(chatName);
         }
 
         return v;
