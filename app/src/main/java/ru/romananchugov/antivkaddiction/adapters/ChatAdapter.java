@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -157,6 +158,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private TextView messageBody;
         private TextView messageUser;
         private TextView messageTime;
+        private ImageView attachment;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -167,6 +169,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 messageUser = linearLayout.findViewById(R.id.tv_message_user);
             }
             messageTime = linearLayout.findViewById(R.id.tv_message_time);
+            attachment = linearLayout.findViewById(R.id.iv_message_attachment);
+            attachment.setVisibility(View.GONE);
         }
 
         public void bind(int position){
@@ -198,6 +202,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             }
             if(messageObject.has("attachments")){
                 messageBody.setText("attachments(coming soon)");
+                attachment.setVisibility(View.VISIBLE);
+                attachment.setImageDrawable(mainActivity.getResources().getDrawable(R.drawable.bg_toolbar_shadow_dark));
+
             }
             if(messageObject.has("fwd_messages")){
                 messageBody.setText("fwd_messages(coming soon)");
