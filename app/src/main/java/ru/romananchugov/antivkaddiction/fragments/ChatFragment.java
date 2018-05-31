@@ -51,7 +51,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.chat_fragment, container, false);
+        View v = inflater.inflate(R.layout.fragment_chat, container, false);
         adapter = new ChatAdapter(chatId, mainActivity);
         chatMessagesRecycler = v.findViewById(R.id.rv_chat_messages);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());

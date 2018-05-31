@@ -1,5 +1,6 @@
 package ru.romananchugov.antivkaddiction.adapters;
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
@@ -7,9 +8,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
@@ -41,6 +46,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
     private MainActivity mainActivity;
     private VKList<VKApiDialog> messagesList;
     private ArrayList<Integer> chatIdsArray;
+    private ArrayList<JSONObject> chatsJsons;
     private int offset = 0;
     private int count = 20;
 
@@ -49,6 +55,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
         this.messagesList = messageList;
         this.mainActivity = mainActivity;
         chatIdsArray = new ArrayList<>();
+        chatsJsons = new ArrayList<>();
         loadNewDialogs();
     }
 
@@ -56,9 +63,9 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LinearLayout linearLayout = (LinearLayout) LayoutInflater.
-                from(parent.getContext()).inflate(R.layout.chat_list_item, parent, false);
-        return new ViewHolder(linearLayout);
+        RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.
+                from(parent.getContext()).inflate(R.layout.chats_list_item, parent, false);
+        return new ViewHolder(relativeLayout);
     }
 
     @Override
@@ -91,6 +98,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
                     JSONArray dialogsJsonArray = response.json.getJSONObject("response").getJSONArray("items");
                     for(int i = 0; i < dialogsJsonArray.length(); i++){
                         JSONObject currentMessage = dialogsJsonArray.getJSONObject(i).getJSONObject("message");
+                        chatsJsons.add(currentMessage);
                         Integer chatId = currentMessage.getInt("user_id");
                         if(currentMessage.has("chat_id")){
                             chatId = currentMessage.getInt("chat_id") + 2000000000;
@@ -115,23 +123,46 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
         offset += count;
     }
 
+    public String loadUserImage(int userId, final ImageView chatIcon) {
+        final VKRequest request = VKApi.users()
+                .get(VKParameters.from(VKApiConst.USER_IDS, userId
+                        ,VKApiConst.FIELDS, "photo_50"));
+        request.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override
+            public void onComplete(VKResponse response) {
+                Log.i(TAG, "onComplete: " + response.json.toString());
+                VKApiUser user = ((VKList<VKApiUser>) response.parsedModel).get(0);
+                glideLoading(chatIcon, user.photo_50);
+            }
+        });
+        return null;
+    }
+
+    public void glideLoading(ImageView imageView, String url){
+        Log.i(TAG, "glideLoading: " + url);
+        Glide.with(mainActivity)
+                .load(url)
+                .apply(RequestOptions.circleCropTransform())
+                .into(imageView);
+    }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        private LinearLayout linearLayout;
+        private RelativeLayout relativeLayout;
         private TextView messageTitle;
         private TextView messageBody;
+        private ImageView chatIcon;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            linearLayout = (LinearLayout)itemView;
-            messageTitle = linearLayout.findViewById(R.id.tv_chat_title);
-            messageBody = linearLayout.findViewById(R.id.tv_chat_body);
+            relativeLayout = (RelativeLayout) itemView;
+            messageTitle = relativeLayout.findViewById(R.id.tv_chat_title);
+            messageBody = relativeLayout.findViewById(R.id.tv_chat_body);
+            chatIcon = relativeLayout.findViewById(R.id.iv_chat_icon);
         }
 
         public void bind(final int position){
-            Log.i(TAG, "bind: " + messagesList.get(position).message.toString());
             //MESSAGE TITLE BINDING
             if(!messagesList.get(position).message.title.equals("")) {
                 messageTitle.setText(messagesList.get(position).message.title);
@@ -154,7 +185,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
                 messageBody.setText(R.string.message_not_support);
             }
 
-            linearLayout.setOnClickListener(new View.OnClickListener() {
+            relativeLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
@@ -173,6 +204,22 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
                     ft.commit();
                 }
             });
+
+            //CHAT ICON BINDING
+            try {
+                JSONObject currentChat = chatsJsons.get(position);
+                if(currentChat.has("photo_50")){
+                    glideLoading(chatIcon, currentChat.getString("photo_50"));
+                }else if(currentChat.get("title").equals("")){
+                    loadUserImage(currentChat.getInt("user_id"), chatIcon);
+                }else {
+                    String letter = currentChat.getString("title").substring(0, 1);
+                    TextDrawable textDrawable = TextDrawable.builder().buildRound(letter, Color.RED);
+                    chatIcon.setImageDrawable(textDrawable);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
