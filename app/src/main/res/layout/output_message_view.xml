@@ -28,6 +28,11 @@
             android:textSize="12sp"
             android:gravity="end"
             android:minWidth="25dp"/>
+        <ImageView
+            android:id="@+id/iv_message_attachment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
     </LinearLayout>
 
 </LinearLayout>
