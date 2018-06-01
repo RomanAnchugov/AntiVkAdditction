@@ -1,6 +1,5 @@
 package ru.romananchugov.antivkaddiction.adapters;
 
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.vk.sdk.api.VKApi;
@@ -152,6 +152,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
         private TextView messageTitle;
         private TextView messageBody;
         private ImageView chatIcon;
+        private int letterIconColor;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -160,6 +161,8 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
             messageTitle = relativeLayout.findViewById(R.id.tv_chat_title);
             messageBody = relativeLayout.findViewById(R.id.tv_chat_body);
             chatIcon = relativeLayout.findViewById(R.id.iv_chat_icon);
+            ColorGenerator generator = ColorGenerator.MATERIAL;
+            letterIconColor = generator.getRandomColor();
         }
 
         public void bind(final int position){
@@ -214,7 +217,7 @@ public class ChatsListAdapter extends RecyclerView.Adapter<ChatsListAdapter.View
                     loadUserImage(currentChat.getInt("user_id"), chatIcon);
                 }else {
                     String letter = currentChat.getString("title").substring(0, 1);
-                    TextDrawable textDrawable = TextDrawable.builder().buildRound(letter, Color.RED);
+                    TextDrawable textDrawable = TextDrawable.builder().buildRound(letter, letterIconColor);
                     chatIcon.setImageDrawable(textDrawable);
                 }
             } catch (JSONException e) {
