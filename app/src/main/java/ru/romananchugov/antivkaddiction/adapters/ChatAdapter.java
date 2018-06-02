@@ -146,22 +146,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         pastOffset = offset;
     }
 
-    public String loadUserInfo(int userId, final TextView messageUser) {
-        final VKRequest request = VKApi.users()
-                .get(VKParameters.from(VKApiConst.USER_IDS, userId));
-        request.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-                VKApiUser user = ((VKList<VKApiUser>) response.parsedModel).get(0);
-                messageUser.setText(user.first_name + " " + user.last_name);
-            }
-        });
-        return null;
-    }
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private int viewType;
+        private String messageUserStr;
+        private String messageBodyStr;
+        private int messageColor;
 
         private LinearLayout linearLayout;
 
@@ -185,7 +175,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             //action message
             actionMessage = linearLayout.findViewById(R.id.tv_action_message);
+
+            Random random = new Random();
+            messageColor =
+                    Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255));
         }
+
 
         public void bind(int position) {
             JSONObject messageObject = null;
@@ -199,15 +194,20 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
                 if (messageUser != null) {
                     if (messageObject.has("chat_id")) {
-                        loadUserInfo(messageObject.getInt("from_id"), messageUser);
-                        Random random = new Random();
-                        messageUser.setTextColor(Color.rgb(random.nextInt(255),
-                                random.nextInt(255),
-                                random.nextInt(255)));
+                        loadUserInfo(messageObject.getInt("from_id"), messageUser, "");
+                        messageUser.setTextColor(messageColor);
                     } else if (mainActivity.getSupportActionBar() != null) {
-                        messageUser.setText(mainActivity.getSupportActionBar().getTitle());
+                        if(messageUserStr == null) {
+                            messageUserStr = mainActivity.getSupportActionBar().getTitle().toString();
+                        }
+                        messageUser.setText(messageUserStr);
                     }
+                }
 
+                if(actionMessage != null){
+                    loadUserInfo(messageObject.getInt("from_id"), actionMessage,
+                            messageObject.getString("action") + " "
+                            + messageObject.getString("action_text"));
                 }
 
                 if(viewType == INPUT_MESSAGE || viewType == OUTPUT_MESSAGE) {
@@ -229,13 +229,30 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                         messageBody.setText("body with fwd_messages(coming soon)");
                     }
                 }
-                if(viewType == ACTION_MESSAGE){
-                    actionMessage.setText(messageObject.getString("action") + " "
-                            + messageObject.getString("action_text"));
-                }
+//                if(viewType == ACTION_MESSAGE){
+//                    actionMessage.setText(messageUserStr + " " + messageObject.getString("action") + " "
+//                            + messageObject.getString("action_text"));
+//                }
 
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+        }
+
+        public void loadUserInfo(int userId, final TextView messageUser, final String additionInfo) {
+            if(messageUserStr == null) {
+                final VKRequest request = VKApi.users()
+                        .get(VKParameters.from(VKApiConst.USER_IDS, userId));
+                request.executeWithListener(new VKRequest.VKRequestListener() {
+                    @Override
+                    public void onComplete(VKResponse response) {
+                        VKApiUser user = ((VKList<VKApiUser>) response.parsedModel).get(0);
+                        messageUserStr = user.first_name + " " + user.last_name;
+                        messageUser.setText(messageUserStr + additionInfo);
+                    }
+                });
+            }else{
+                messageUser.setText(messageUserStr + " " +additionInfo);
             }
         }
     }
